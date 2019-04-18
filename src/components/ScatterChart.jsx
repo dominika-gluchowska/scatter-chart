@@ -39,11 +39,7 @@ class ScatterChart extends Component {
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        data.forEach(function(d) {
-            d.x = +d.x;
-            d.y = +d.y;
-            d.yhat = +d.yhat;
-        });
+        this.assignData();
 
         var line = lineD3()
             .x(function(d) {
@@ -52,13 +48,6 @@ class ScatterChart extends Component {
             .y(function(d) {
                 return y(d.yhat);
             });
-
-        x.domain(extent(data, function(d) {
-            return d.x;
-        }));
-        y.domain(extent(data, function(d) {
-            return d.y;
-        }));
 
         //create axis
         svg.append("g")
@@ -96,40 +85,59 @@ class ScatterChart extends Component {
                 return y(d.y);
             });
 
-        /*svg.append("path")
+        svg.append("path")
             .datum(data)
-            .attr("class", "line")
-            .attr("d", line);*/
+            .attr("class", () => ("line " + className))
+            .attr("d", line);
     }
 
     componentDidUpdate(){
+        const {className} = this.props;
+        this.assignData();
 
-                const {data, className} = this.props;
+        // Select the section we want to apply our changes to
+        var svg = select("#chartHere svg")
 
-                // Scale the range of the data again
-                x.domain(extent(data, (d) =>  d.x ));
-                y.domain(extent(data, (d) => d.y));
+        // Make the changes
+        svg.selectAll(".dot")
+            .attr("class", () => ("dot " + className))
+            .attr("cx", function(d) {
+                return x(d.x);
+            })
+            .attr("cy", function(d) {
+                return y(d.y);
+            });
+        svg.select(".x.axis") // change the x axis
+            .call(xAxis);
+        svg.select(".y.axis") // change the y axis
+            .call(yAxis);
 
-                // Select the section we want to apply our changes to
-                var svg = select("#chartHere svg")
+        var line = lineD3()
+            .x(function(d) {
+                return x(d.x);
+            })
+            .y(function(d) {
+                return y(d.yhat);
+            });
 
-                // Make the changes
-                svg.selectAll(".dot")
-                    .attr("class", () => ("dot " + className))
-                    .attr("cx", function(d) {
-                    return x(d.x);
-                    })
-                    .attr("cy", function(d) {
-                        return y(d.y);
-                    });
-                svg.select(".x.axis") // change the x axis
-                    .call(xAxis);
-                svg.select(".y.axis") // change the y axis
-                    .call(yAxis);
-
-
-
+        svg.select('.line')
+            .attr("d", line)
+            .attr("class", () => ("line " + className));
     }
+
+    assignData = () => {
+        const {data } = this.props;
+
+        data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+            d.yhat = +d.yhat;
+        });
+
+        // Scale the range of the data again
+        x.domain(extent(data, (d) =>  d.x ));
+        y.domain(extent(data, (d) => d.y));
+}
 
     render() {
         return (

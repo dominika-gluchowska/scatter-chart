@@ -16,6 +16,15 @@ class App extends Component {
         selectedValue: 'dataSourceA'
     }
 
+    constructor(props) {
+        super(props)
+        fetch('http://127.0.0.1:8080/chart-data')
+            .then((res) => res.json())
+            .then((response)=>{
+            console.log(response)
+        })
+    }
+
     changeDataSource = (event) => {
         this.setState({
             selectedDataSource: dataMap[event.target.value],
@@ -30,12 +39,13 @@ class App extends Component {
       const {selectedValue, selectedDataSource} = this.state;
     return [
       <div className="App" id="chartHere"> </div>,
-        <ScatterChart data={selectedDataSource} className={selectedValue}/>,
-        <select onChange={this.changeDataSource} value={selectedValue}>
+        <ScatterChart key="chart" data={selectedDataSource} className={selectedValue}/>,
+        <select key="select" onChange={this.changeDataSource} value={selectedValue}>
           <option value="dataSourceA">Source 1</option>
           <option value="dataSourceB">Source 2</option>
           <option value="dataSourceC">Source 3</option>
         </select>
+
     ];
   }
 }
